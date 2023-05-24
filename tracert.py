@@ -24,14 +24,14 @@ class Traceroute:
             recv_begin_time = time.time()
 
             receiver = self.__create_receiver_socket()
-            send_socket = self.__create_sender_socket()
+            sender = self.__create_sender_socket()
 
             received_addr = None
             finished = False
             tries_get_data = 3
             tries_values = []
 
-            send_socket.sendto(IcmpPacket(IcmpPacket.ECHO_REQUEST, 0).pack(), (destination_addr, self._PORT))
+            sender.sendto(IcmpPacket(IcmpPacket.ECHO_REQUEST, 0).pack(), (destination_addr, self._PORT))
 
             while not finished and tries_get_data > 0:
                 try:
@@ -48,7 +48,7 @@ class Traceroute:
                     tries_values.append('*')
 
             receiver.close()
-            send_socket.close()
+            sender.close()
 
             trace_view = self._get_view_trace(tries_values, received_addr)
 
