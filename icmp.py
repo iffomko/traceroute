@@ -20,16 +20,18 @@ class IcmpPacket:
         self._icmp_code = icmp_code
 
     def _get_checksum(self):
-        icmp_temp = struct.pack('!2BH', self._icmp_type, self._icmp_code, 0)
+        packet_temp = struct.pack('!2BH', self._icmp_type, self._icmp_code, 0)
 
-        checksum = 0
+        acc = 0
 
-        for i in range(0, len(icmp_temp), 2):
-            checksum += (icmp_temp[i] << 8) + icmp_temp[i + 1]
+        for i in range(0, len(packet_temp), 2):
+            acc += (packet_temp[i] << 8) + packet_temp[i + 1]
 
-        checksum = (checksum >> 16) + (checksum & 0xffff)
+        checksum = (acc >> 16) + (acc & 0xffff)
 
         return checksum & 0xffff
 
     def pack(self) -> bytes:
-        return struct.pack('!2B3H', self._icmp_type, self._icmp_code, self._get_checksum(), 1, random.randint(400, 3000))
+        return struct.pack(
+            '!2B3H', self._icmp_type, self._icmp_code, self._get_checksum(), 1, random.randint(256, 3000)
+        )

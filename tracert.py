@@ -10,8 +10,9 @@ class Traceroute:
         self._PORT = 80
         self._TTL_MAX_HOP = 30
         self._ttl = 1
+        self._TIMEOUT = 3
 
-    def traceroute(self, website: str):
+    def run(self, website: str):
         destination_addr = socket.gethostbyname(website)
 
         print(
@@ -34,12 +35,12 @@ class Traceroute:
 
             while not finished and tries_get_data > 0:
                 try:
-                    data, received_addr = receiver.recv(1024)
+                    data, received_addr = receiver.recvfrom(1024)
                     recv_end_time = time.time()
 
                     finished = True
 
-                    tries_values.append(str((recv_end_time - recv_begin_time) * 1000))
+                    tries_values.append(str(int((recv_end_time - recv_begin_time) * 1000)))
                 except socket.timeout:
                     tries_get_data -= 1
                     tries_values.append('*')
@@ -47,8 +48,19 @@ class Traceroute:
             receiver.close()
             send_socket.close()
 
+            for i in range(len(tries_values), 3):
+                tries_values.append(tries_values[len(tries_values) - 1])
+
+            for i in range(0, len(tries_values)):
+                tries_values[i] = self._format_time(tries_values[i])
+
             if received_addr is not None:
-                print(f'{self._ttl}. {"    ".join(tries_values)} {received_addr}')
+                received_name = socket.gethostbyname(received_addr[0])
+
+                if received_name == received_addr:
+                    print(f'{self._ttl}. {"    ".join(tries_values)} {received_name}')
+                else:
+                    print(f'{self._ttl}. {"    ".join(tries_values)} {received_name} [{received_addr[0]}]')
             else:
                 print(f'{self._ttl}. {"    ".join(tries_values)}  Превышен интервал для ожидания запроса.')
 
@@ -59,17 +71,25 @@ class Traceroute:
 
     def __create_receiver_socket(self) -> socket:
         recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
-        recv_socket.settimeout(1)
-
-        try:
-            recv_socket.bind(('', self._PORT))
-        except socket.error as e:
-            print(f'Не удалось привязать адрес к сокет для приема запросов на все сетевые интерфейсы: {e}')
+        recv_socket.settimeout(self._TIMEOUT)
 
         return recv_socket
 
     def __create_sender_socket(self) -> socket:
-        sender_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_UDP)
+        sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_ICMP)
         sender_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, self._ttl)
 
         return sender_socket
+
+    @staticmethod
+    def _format_time(time_data: str) -> str:
+        if len(time_data) < 2:
+            return f'   {time_data}'
+
+        if len(time_data) < 3:
+            return f'  {time_data}'
+
+        if len(time_data) < 4:
+            return f' {time_data}'
+
+        return f'{time_data}'
