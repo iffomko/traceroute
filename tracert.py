@@ -41,6 +41,8 @@ class Traceroute:
                     finished = True
 
                     tries_values.append(str(int((recv_end_time - recv_begin_time) * 1000)))
+
+                    received_addr = received_addr[0]
                 except socket.timeout:
                     tries_get_data -= 1
                     tries_values.append('*')
@@ -48,25 +50,13 @@ class Traceroute:
             receiver.close()
             send_socket.close()
 
-            for i in range(len(tries_values), 3):
-                tries_values.append(tries_values[len(tries_values) - 1])
+            trace_view = self._get_view_trace(tries_values, received_addr)
 
-            for i in range(0, len(tries_values)):
-                tries_values[i] = self._format_time(tries_values[i])
-
-            if received_addr is not None:
-                received_name = socket.gethostbyname(received_addr[0])
-
-                if received_name == received_addr:
-                    print(f'{self._ttl}. {"    ".join(tries_values)} {received_name}')
-                else:
-                    print(f'{self._ttl}. {"    ".join(tries_values)} {received_name} [{received_addr[0]}]')
-            else:
-                print(f'{self._ttl}. {"    ".join(tries_values)}  Превышен интервал для ожидания запроса.')
+            print(trace_view)
 
             self._ttl += 1
 
-            if received_addr[0] == destination_addr or self._ttl > self._TTL_MAX_HOP:
+            if (received_addr is not None and received_addr == destination_addr) or self._ttl > self._TTL_MAX_HOP:
                 break
 
     def __create_receiver_socket(self) -> socket:
@@ -81,15 +71,39 @@ class Traceroute:
 
         return sender_socket
 
+    def _format_time(self, time_data: str) -> str:
+        return f'{self._generate_spaces(str(self._TIMEOUT * 1000), time_data)}{time_data}'
+
+    def _format_number_trace(self, number: str) -> str:
+        return f'{number}.{self._generate_spaces(str(self._TTL_MAX_HOP), number)}'
+
+    def _get_view_trace(self, tries_values: list, received_addr: str):
+        for i in range(len(tries_values), 3):
+            tries_values.append(tries_values[len(tries_values) - 1])
+
+        for i in range(0, len(tries_values)):
+            tries_values[i] = self._format_time(tries_values[i])
+
+        number_trace = self._format_number_trace(str(self._ttl))
+        tries_str = "  ".join(tries_values)
+
+        if received_addr is not None:
+            received_name = socket.gethostbyname(received_addr)
+
+            if received_name == received_addr:
+                return f'{number_trace}' \
+                       f'{tries_str}  {received_name}'
+            else:
+                return f'{number_trace}' \
+                       f'{tries_str}  {received_name} [{received_addr}]'
+        else:
+            return f'{number_trace}{tries_str}  Превышен интервал для ожидания запроса.'
+
     @staticmethod
-    def _format_time(time_data: str) -> str:
-        if len(time_data) < 2:
-            return f'   {time_data}'
+    def _generate_spaces(comparable_data: str, data: str) -> str:
+        spaces = []
 
-        if len(time_data) < 3:
-            return f'  {time_data}'
+        for i in range(0, len(comparable_data) - len(data)):
+            spaces.append(' ')
 
-        if len(time_data) < 4:
-            return f' {time_data}'
-
-        return f'{time_data}'
+        return "".join(spaces)
