@@ -66,7 +66,7 @@ class Traceroute:
 
             self._ttl += 1
 
-            if received_addr == destination_addr or self._ttl > self._TTL_MAX_HOP:
+            if received_addr[0] == destination_addr or self._ttl > self._TTL_MAX_HOP:
                 break
 
     def __create_receiver_socket(self) -> socket:
