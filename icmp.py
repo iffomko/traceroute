@@ -39,5 +39,5 @@ class IcmpPacket:
 
     def pack(self) -> bytes:
         return struct.pack(
-            '!2B3H', self._icmp_type, self._icmp_code, self._get_checksum(), 1, random.randint(256, 3000)
+            '!2B3H', self._icmp_type, self._icmp_code, self._get_checksum(), 1, 256
         )

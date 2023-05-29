@@ -9,5 +9,6 @@ def main():
     except PermissionError:
         print('\nНе хватает прав для запуска скрипта\n')
 
+
 if __name__ == '__main__':
     main()

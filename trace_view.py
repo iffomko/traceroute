@@ -2,7 +2,6 @@ import socket
 
 
 class TraceView:
-
     def _format_number_trace(self, number: str, ttl_max_hops: int) -> str:
         return f'{number}.{self._generate_spaces(str(ttl_max_hops), number)}'
 
