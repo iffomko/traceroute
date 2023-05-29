@@ -19,6 +19,12 @@ class IcmpPacket:
         self._icmp_type = icmp_type
         self._icmp_code = icmp_code
 
+    @staticmethod
+    def from_bytes(packet: bytes) -> 'IcmpPacket':
+        packet_tuple = struct.unpack('!2B', packet[:2])
+
+        return IcmpPacket(packet_tuple[0], packet_tuple[1])
+
     def _get_checksum(self):
         packet_temp = struct.pack('!2BH', self._icmp_type, self._icmp_code, 0)
 
