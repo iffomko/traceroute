@@ -4,7 +4,7 @@ import socket
 
 class WhoisDataFinder:
     def __init__(self):
-        self.white_ips = [
+        self.gray_ips = [
             '192.168.',
             '172.16.',
             '10.',
@@ -18,7 +18,7 @@ class WhoisDataFinder:
         self._WHOIS_RE = re.compile(r"([A-Za-z\-]+):\s+([^\#\n]+)")
 
     def is_white_ip(self, ip: str) -> bool:
-        for pattern in self.white_ips:
+        for pattern in self.gray_ips:
             if ip.startswith(pattern):
                 return False
 
@@ -27,7 +27,7 @@ class WhoisDataFinder:
     def _get_whois_server(self, address: str) -> str:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as whois_sock:
             whois_sock.settimeout(1)
-            whois_sock.connect((socket.gethostbyname(self._IANA_ADDRESS), 43))
+            whois_sock.connect((socket.gethostbyname(self._IANA_ADDRESS), self._WHOIS_PORT))
             whois_sock.send(f'{address}\r\n'.encode())
 
             try:

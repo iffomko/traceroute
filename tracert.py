@@ -75,18 +75,8 @@ class Traceroute:
         return sender_socket
 
     @staticmethod
-    def receive_data(sock: socket.socket) -> bytes:
-        data = b""
-
-        while True:
-            temp_data = sock.recv(1024)
-
-            if not temp_data:
-                break
-
-            data += temp_data
-
-        return data
+    def receive_data(sock: socket.socket) -> tuple:
+        return sock.recvfrom(1024)
 
     @staticmethod
     def test_for_permissions():
