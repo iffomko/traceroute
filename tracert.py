@@ -1,25 +1,27 @@
 import socket
 
+from enums.parser_enum import ParserEnum
 from icmp import IcmpPacket
 from trace_view import TraceView
 from whois import WhoisDataFinder
 
 
 class Traceroute:
-    def __init__(self):
-        self._PORT = 80
-        self._TTL_MAX_HOPS = 30
+    def __init__(self, params: dict):
+        self._PORT = params.get(ParserEnum.trace_port_key)
+        self._TTL_MAX_HOPS = params.get(ParserEnum.ttl_max_key)
+        self._TIMEOUT = params.get(ParserEnum.timeout_key)
+        self._TARGET = params.get(ParserEnum.target_key)
         self._ttl = 1
-        self._TIMEOUT = 3
         self.trace_view = TraceView()
 
-    def run(self, website: str):
+    def run(self):
         Traceroute.test_for_permissions()
 
-        destination_addr = socket.gethostbyname(website)
+        destination_addr = socket.gethostbyname(self._TARGET)
 
         print(self.trace_view.get_header(
-                website=website,
+                website=self._TARGET,
                 destination_addr=destination_addr,
                 ttl_max_hops=self._TTL_MAX_HOPS
         ))
