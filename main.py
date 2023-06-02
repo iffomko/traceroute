@@ -5,22 +5,20 @@ from enums.parser_enum import ParserEnum
 from tracert import Traceroute
 
 
-def main():
+def main(argv: list):
     try:
-        params = Parser().parse(sys.argv)
+        params = Parser().parse(argv)
 
         if params.get(ParserEnum.help_key):
-            print(params.get(ParserEnum.help_key_text))
-            return
+            return params.get(ParserEnum.help_key_text)
 
         if params.get(ParserEnum.error):
-            print(params.get(ParserEnum.error_message))
-            return
+            return params.get(ParserEnum.error_message)
 
         Traceroute(params).run()
     except PermissionError:
-        print('\nНе хватает прав для запуска скрипта\n')
+        return '\nНе хватает прав для запуска скрипта\n'
 
 
 if __name__ == '__main__':
-    main()
+    print(main(sys.argv))

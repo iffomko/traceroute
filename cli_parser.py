@@ -39,7 +39,11 @@ class Parser:
             try:
                 params[ParserEnum.trace_port_key] = int(argv[self.find(argv, ParserEnum.trace_port_flag) + 1])
             except IndexError:
-                pass
+                return {
+                    ParserEnum.error: True,
+                    ParserEnum.error_message: f'Вы не ввели порт, на котором будет '
+                                              f'работать traceroute ({ParserEnum.trace_port_flag})'
+                }
         else:
             params[ParserEnum.trace_port_key] = self._STANDARD_PORT
 
@@ -47,7 +51,11 @@ class Parser:
             try:
                 params[ParserEnum.ttl_max_key] = int(argv[self.find(argv, ParserEnum.ttl_max_flag) + 1])
             except IndexError:
-                pass
+                return {
+                    ParserEnum.error: True,
+                    ParserEnum.error_message: f'Вы не ввели не верное значение '
+                                              f'для максимального времени жизни ({ParserEnum.ttl_max_flag})'
+                }
             except ValueError:
                 return {
                     ParserEnum.error: True,
@@ -61,9 +69,20 @@ class Parser:
             try:
                 params[ParserEnum.timeout_key] = int(argv[self.find(argv, ParserEnum.timeout_flag) + 1])
             except IndexError:
-                pass
+                return {
+                    ParserEnum.error: True,
+                    ParserEnum.error_message: f'Вы не ввели не верное значение '
+                                              f'для таймаута ожидания ({ParserEnum.timeout_flag})'
+                }
             except ValueError:
-                params[ParserEnum.timeout_key] = float(argv[self.find(argv, ParserEnum.timeout_flag) + 1])
+                try:
+                    params[ParserEnum.timeout_key] = float(argv[self.find(argv, ParserEnum.timeout_flag) + 1])
+                except ValueError:
+                    return {
+                        ParserEnum.error: True,
+                        ParserEnum.error_message: f'Вы не ввели не верное значение '
+                                                  f'для таймаута ожидания ({ParserEnum.timeout_flag})'
+                    }
         else:
             params[ParserEnum.timeout_key] = self._STANDARD_TIMEOUT
 
@@ -71,7 +90,10 @@ class Parser:
             try:
                 params[ParserEnum.target_key] = argv[self.find(argv, ParserEnum.target_flag) + 1]
             except IndexError:
-                pass
+                return {
+                    ParserEnum.error: True,
+                    ParserEnum.error_message: 'Вы не указали адрес, маршрут которого хотите получить'
+                }
         else:
             return {
                 ParserEnum.error: True,

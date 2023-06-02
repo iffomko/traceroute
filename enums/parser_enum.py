@@ -16,4 +16,4 @@ class ParserEnum:
     help_key_text = 'help_text'
 
     error = 'error'
-    error_message = 'error'
+    error_message = 'error_message'
