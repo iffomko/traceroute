@@ -57,9 +57,14 @@ class WhoisDataFinder:
             whois_socket.send(f'{address}\r\n'.encode())
 
             try:
-                data = self.receive_data(whois_socket)
+                data = ''
 
-                response = self._parse_whois_response(self._data_or_default(data.decode()))
+                try:
+                    data = self.receive_data(whois_socket).decode()
+                except UnicodeDecodeError:
+                    pass
+
+                response = self._parse_whois_response(self._data_or_default(data))
                 response['local'] = False
 
                 return response

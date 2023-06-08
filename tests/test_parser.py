@@ -1,3 +1,4 @@
+import socket
 import unittest
 
 from cli_parser import Parser
@@ -18,6 +19,8 @@ class TestParser(unittest.TestCase):
                                       f'{ParserEnum.timeout_flag} - максимальное время ожидания ответа'
                                       f'от промежуточного узла с фиксированным временем жизни (по-умолчанию'
                                       f'стоит 3 секунды)\r\n'
+                                      f'{ParserEnum.middle_link_flag} - промежуточный ip, через который должен быть'
+                                      f'построен маршрут\r\n'
                                       f'{ParserEnum.target_flag} - адрес (ip или домен), маршрут которого'
                                       f'хотите получить (обязательный параметр)\r\n'
         }
@@ -32,7 +35,8 @@ class TestParser(unittest.TestCase):
             ParserEnum.timeout_key: 0.1,
             ParserEnum.ttl_max_key: 50,
             ParserEnum.trace_port_key: 81,
-            ParserEnum.error: False
+            ParserEnum.error: False,
+            ParserEnum.middle_link_key: ''
         }
 
         actual_result = Parser().parse('main.py --target google.com -t 0.1 --ttl-max 50 --trace-port 81'.split(' '))
@@ -77,7 +81,8 @@ class TestParser(unittest.TestCase):
             ParserEnum.timeout_key: 3,
             ParserEnum.ttl_max_key: 30,
             ParserEnum.trace_port_key: 80,
-            ParserEnum.error: False
+            ParserEnum.error: False,
+            ParserEnum.middle_link_key: ''
         }
 
         actual_result = Parser().parse('main.py --target google.com'.split(' '))

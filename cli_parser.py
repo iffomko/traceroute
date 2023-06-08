@@ -6,6 +6,7 @@ class Parser:
         self._STANDARD_PORT = 80
         self._STANDARD_MAX_TTL = 30
         self._STANDARD_TIMEOUT = 3
+        self._STANDARD_MIDDLE_LINK = ''
 
     @staticmethod
     def find(array: list, target: str) -> int:
@@ -29,6 +30,8 @@ class Parser:
                                           f'{ParserEnum.timeout_flag} - максимальное время ожидания ответа'
                                           f'от промежуточного узла с фиксированным временем жизни (по-умолчанию'
                                           f'стоит 3 секунды)\r\n'
+                                          f'{ParserEnum.middle_link_flag} - промежуточный ip, через который должен быть'
+                                          f'построен маршрут\r\n'
                                           f'{ParserEnum.target_flag} - адрес (ip или домен), маршрут которого'
                                           f'хотите получить (обязательный параметр)\r\n'
             }
@@ -99,6 +102,17 @@ class Parser:
                 ParserEnum.error: True,
                 ParserEnum.error_message: 'Вы не указали адрес, маршрут которого хотите получить'
             }
+
+        if ParserEnum.middle_link_flag in argv:
+            try:
+                params[ParserEnum.middle_link_key] = argv[self.find(argv, ParserEnum.middle_link_flag) + 1]
+            except IndexError:
+                return {
+                    ParserEnum.error: True,
+                    ParserEnum.error_message: 'Вы не указали значение для промежуточного ip'
+                }
+        else:
+            params[ParserEnum.middle_link_key] = self._STANDARD_MIDDLE_LINK
 
         params[ParserEnum.error] = False
 
