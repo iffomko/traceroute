@@ -17,3 +17,6 @@ class ParserEnum:
 
     error = 'error'
     error_message = 'error_message'
+
+    middle_link_flag = '--middle'
+    middle_link_key = 'middle_link'

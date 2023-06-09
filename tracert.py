@@ -2,6 +2,7 @@ import socket
 
 from enums.parser_enum import ParserEnum
 from icmp import IcmpPacket
+from ip_source_route import IPSourceRoute
 from trace_view import TraceView
 from whois import WhoisDataFinder
 
@@ -12,6 +13,8 @@ class Traceroute:
         self._TTL_MAX_HOPS = params.get(ParserEnum.ttl_max_key)
         self._TIMEOUT = params.get(ParserEnum.timeout_key)
         self._TARGET = params.get(ParserEnum.target_key)
+        self._MIDDLE_LINK = params.get(ParserEnum.middle_link_key)
+        self._EMPTY_ADDR = socket.gethostbyname('')
         self._ttl = 1
         self.trace_view = TraceView()
 
@@ -19,6 +22,7 @@ class Traceroute:
         Traceroute.test_for_permissions()
 
         destination_addr = socket.gethostbyname(self._TARGET)
+        middle_addr = socket.gethostbyname(self._MIDDLE_LINK)
 
         print(self.trace_view.get_header(
                 website=self._TARGET,
@@ -28,13 +32,16 @@ class Traceroute:
 
         while True:
             receiver = self._create_receiver_socket()
-            sender = self._create_sender_socket()
+            sender = self._create_sender_socket(middle_addr=middle_addr)
 
             received_addr = None
             finished = False
             tries_get_data = 3
 
-            sender.sendto(IcmpPacket(IcmpPacket.ECHO_REQUEST, 0).pack(), (destination_addr, self._PORT))
+            try:
+                sender.sendto(IcmpPacket(IcmpPacket.ECHO_REQUEST, 0).pack(), (destination_addr, self._PORT))
+            except OSError as e:
+                pass
 
             while not finished and tries_get_data > 0:
                 try:
@@ -70,9 +77,14 @@ class Traceroute:
 
         return recv_socket
 
-    def _create_sender_socket(self) -> socket:
+    def _create_sender_socket(self, middle_addr='') -> socket:
         sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_ICMP)
         sender_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, self._ttl)
+
+        if middle_addr != self._EMPTY_ADDR and len(middle_addr) != 0:
+            loose_source_route = IPSourceRoute(IPSourceRoute.TYPE_LOOSE_SOURCE_ROUTE, [middle_addr])
+
+            sender_socket.setsockopt(socket.IPPROTO_IP, socket.IP_OPTIONS, loose_source_route.pack())
 
         return sender_socket
 
