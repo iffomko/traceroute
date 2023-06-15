@@ -34,7 +34,7 @@ class Traceroute:
             finished = False
             tries_get_data = 3
 
-            sender.sendto(IcmpPacket(IcmpPacket.ECHO_REQUEST, 0).pack(), (destination_addr, self._PORT))
+            sender.sendto(b"", (destination_addr, self._PORT))
 
             while not finished and tries_get_data > 0:
                 try:
@@ -65,13 +65,13 @@ class Traceroute:
                 break
 
     def _create_receiver_socket(self) -> socket:
-        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_ICMP)
+        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
         recv_socket.settimeout(self._TIMEOUT)
 
         return recv_socket
 
     def _create_sender_socket(self) -> socket:
-        sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_ICMP)
+        sender_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_TCP)
         sender_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, self._ttl)
 
         return sender_socket
